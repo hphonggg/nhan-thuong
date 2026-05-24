@@ -2,37 +2,69 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Trang Nhận Thưởng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Rewards | Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at top right, #1a1a2e, #16213e);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            width: 350px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        h2 { font-weight: 600; margin-bottom: 20px; }
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: 0.3s;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+        }
+        .btn-link { background: #5865F2; color: white; }
+        .btn-link:hover { background: #4752c4; transform: translateY(-3px); }
+        .btn-claim { background: #2ecc71; color: white; }
+        .btn-claim:hover { background: #27ae60; transform: translateY(-3px); }
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <h1 id="status">Đang kiểm tra trạng thái...</h1>
-        <div id="content"></div>
+
+    <div class="card">
+        <h2 id="title">Hệ thống Nhận Thưởng</h2>
+        <div id="content">
+            </div>
     </div>
 
     <script>
-        // Lấy access_token từ URL sau khi Discord redirect về
         const fragment = new URLSearchParams(window.location.hash.slice(1));
         const accessToken = fragment.get('access_token');
-
-        const statusEl = document.getElementById('status');
-        const contentEl = document.getElementById('content');
+        const content = document.getElementById('content');
+        const title = document.getElementById('title');
 
         if (!accessToken) {
-            // Nếu chưa có token -> Hiện nút Liên kết
-            statusEl.innerText = "Bạn chưa liên kết Discord";
-            contentEl.innerHTML = `<a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_GITHUB_URL&response_type=token&scope=identify">
-                <button>Liên kết Discord ngay</button>
-            </a>`;
+            title.innerText = "Xác thực tài khoản";
+            content.innerHTML = `<a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_URL&response_type=token&scope=identify" class="btn btn-link">Liên kết Discord</a>`;
         } else {
-            // Nếu đã có token -> Hiện nút Nhận thưởng
-            statusEl.innerText = "Đã liên kết thành công!";
-            contentEl.innerHTML = `<button onclick="nhanThuong()">Nhận Thưởng</button>`;
-        }
-
-        function nhanThuong() {
-            alert("Bạn đã nhận thưởng thành công!");
-            // Ở đây bạn có thể gọi API của bạn để lưu thông tin user vào database
+            title.innerText = "Chúc mừng!";
+            content.innerHTML = `<button class="btn btn-claim" onclick="alert('Đang gửi phần thưởng...')">Nhận Thưởng Ngay</button>`;
         }
     </script>
 </body>
