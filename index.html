@@ -2,69 +2,83 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claim Rewards | Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Claim Rewards | System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle at top right, #1a1a2e, #16213e);
+            font-family: 'Outfit', sans-serif;
+            background: #0a0a0c;
+            background-image: radial-gradient(circle at 20% 30%, #1a1a2e 0%, transparent 50%),
+                              radial-gradient(circle at 80% 70%, #16213e 0%, transparent 50%);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            overflow: hidden;
         }
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            padding: 40px;
-            border-radius: 25px;
+
+        .container {
+            background: rgba(18, 18, 22, 0.7);
+            padding: 50px;
+            border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             text-align: center;
-            width: 350px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            max-width: 400px;
+            transition: 0.5s;
         }
-        h2 { font-weight: 600; margin-bottom: 20px; }
+
+        h2 { color: #fff; font-size: 2rem; margin-bottom: 10px; }
+        p { color: #a0a0a0; margin-bottom: 30px; font-weight: 300; }
+
         .btn {
-            display: inline-block;
-            text-decoration: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: 0.3s;
+            padding: 18px 40px;
+            border-radius: 15px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             cursor: pointer;
             border: none;
+            transition: 0.4s;
             width: 100%;
+            color: #fff;
         }
-        .btn-link { background: #5865F2; color: white; }
-        .btn-link:hover { background: #4752c4; transform: translateY(-3px); }
-        .btn-claim { background: #2ecc71; color: white; }
-        .btn-claim:hover { background: #27ae60; transform: translateY(-3px); }
-        .hidden { display: none; }
+
+        /* Nút Liên kết - Màu Tím Discord */
+        .btn-link { background: linear-gradient(135deg, #7289da, #5865F2); box-shadow: 0 0 20px rgba(88, 101, 242, 0.4); }
+        .btn-link:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(88, 101, 242, 0.6); }
+
+        /* Nút Nhận thưởng - Màu Neon Xanh lá */
+        .btn-claim { background: linear-gradient(135deg, #00f2fe, #4facfe); box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); }
+        .btn-claim:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 242, 254, 0.6); }
+
+        /* Hiệu ứng trôi nổi nhẹ */
+        .container:hover { transform: translateY(-5px); border-color: rgba(88, 101, 242, 0.3); }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2 id="title">Hệ thống Nhận Thưởng</h2>
-        <div id="content">
-            </div>
+    <div class="container">
+        <h2 id="title">Reward System</h2>
+        <p id="desc">Vui lòng xác thực tài khoản để tiếp tục</p>
+        <div id="action-area"></div>
     </div>
 
     <script>
         const fragment = new URLSearchParams(window.location.hash.slice(1));
         const accessToken = fragment.get('access_token');
-        const content = document.getElementById('content');
+        const actionArea = document.getElementById('action-area');
         const title = document.getElementById('title');
+        const desc = document.getElementById('desc');
 
         if (!accessToken) {
-            title.innerText = "Xác thực tài khoản";
-            content.innerHTML = `<a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_URL&response_type=token&scope=identify" class="btn btn-link">Liên kết Discord</a>`;
+            actionArea.innerHTML = `<button class="btn btn-link" onclick="window.location.href='https://discord.com/api/oauth2/authorize?client_id=YOUR_ID&redirect_uri=YOUR_URL&response_type=token&scope=identify'">Liên kết Discord</button>`;
         } else {
-            title.innerText = "Chúc mừng!";
-            content.innerHTML = `<button class="btn btn-claim" onclick="alert('Đang gửi phần thưởng...')">Nhận Thưởng Ngay</button>`;
+            title.innerText = "Sẵn sàng!";
+            desc.innerText = "Chào mừng thành viên, nhấn để nhận thưởng ngay.";
+            actionArea.innerHTML = `<button class="btn btn-claim" onclick="alert('Đã nhận!')">Nhận Thưởng</button>`;
         }
     </script>
 </body>
