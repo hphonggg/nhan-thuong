@@ -7,65 +7,117 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    body { 
-      background: linear-gradient(135deg, #0f172a, #1e2937); 
-    }
-    .glass { 
-      background: rgba(255,255,255,0.09); 
-      backdrop-filter: blur(12px); 
-      border: 1px solid rgba(255,255,255,0.12); 
-    }
+    body { background: linear-gradient(135deg, #0f172a, #1e2937); }
+    .glass { background: rgba(255,255,255,0.09); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); }
   </style>
 </head>
 <body class="min-h-screen text-white flex items-center justify-center p-4">
-  <div class="max-w-md w-full glass rounded-3xl p-10 shadow-2xl text-center">
+  <div class="max-w-md w-full glass rounded-3xl p-10 shadow-2xl text-center" id="mainContent">
     
-    <div class="mb-12">
-      <i class="fas fa-gift text-7xl text-yellow-400 mb-6"></i>
-      <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
-      <p class="text-gray-400 mt-3 text-lg">YeuMoney</p>
+    <div id="loading" class="hidden">
+      <div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-6"></div>
+      <p>Đang kiểm tra...</p>
     </div>
 
-    <button onclick="claimReward()" 
-            class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 
-                   transition-all py-6 rounded-2xl text-2xl font-bold shadow-xl flex items-center justify-center gap-4 text-black">
-      <i class="fas fa-hand-holding-dollar text-3xl"></i>
-      NHẬN THƯỞNG
-    </button>
+    <div id="error" class="hidden">
+      <i class="fas fa-ban text-6xl text-red-500 mb-6"></i>
+      <h1 class="text-3xl font-bold text-red-400">Truy cập bị từ chối</h1>
+      <p class="text-gray-400 mt-4">Link này không hợp lệ hoặc đã hết hạn.<br>Vui lòng dùng lệnh /vuotlink trong Discord.</p>
+    </div>
 
-    <div id="result" class="hidden mt-10 glass rounded-2xl p-8"></div>
+    <div id="success" class="hidden">
+      <i class="fas fa-gift text-7xl text-yellow-400 mb-6"></i>
+      <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
+      <p class="text-gray-400 mt-2">YeuMoney</p>
 
+      <!-- Nút Liên kết Discord -->
+      <div id="discordSection" class="mt-8">
+        <button onclick="linkDiscord()" id="discordBtn"
+                class="w-full bg-[#5865F2] hover:bg-[#4752C4] transition-all py-4 rounded-2xl text-lg font-semibold flex items-center justify-center gap-3">
+          <i class="fab fa-discord text-2xl"></i>
+          LIÊN KẾT DISCORD ĐỂ NHẬN QUÀ
+        </button>
+        <p id="discordStatus" class="text-green-400 text-sm mt-3 hidden">✅ Đã liên kết Discord</p>
+      </div>
+
+      <!-- Nút Nhận Thưởng -->
+      <button onclick="claimReward()" id="claimBtn"
+              class="w-full mt-6 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 
+                     transition-all py-6 rounded-2xl text-2xl font-bold shadow-xl flex items-center justify-center gap-4 text-black">
+        <i class="fas fa-hand-holding-dollar text-3xl"></i>
+        NHẬN THƯỞNG
+      </button>
+    </div>
   </div>
 
   <script>
-    async function claimReward() {
-      const resultDiv = document.getElementById('result');
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    function isDiscordLinked() {
+      return localStorage.getItem('discord_linked') === 'true';
+    }
+
+    function linkDiscord() {
+      // Giả lập liên kết Discord
+      localStorage.setItem('discord_linked', 'true');
       
-      resultDiv.classList.remove('hidden');
+      document.getElementById('discordBtn').classList.add('hidden');
+      document.getElementById('discordStatus').classList.remove('hidden');
+      
+      alert("✅ Liên kết Discord thành công!\nBạn có thể nhận thưởng ngay bây giờ.");
+    }
+
+    async function claimReward() {
+      if (!isDiscordLinked()) {
+        alert("❌ Bạn phải liên kết Discord trước khi nhận thưởng!");
+        return;
+      }
+
+      const resultDiv = document.createElement('div');
+      resultDiv.className = "mt-8 glass rounded-2xl p-8";
       resultDiv.innerHTML = `
         <div class="text-center">
-          <div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-6"></div>
-          <p class="text-xl">Đang gửi yêu cầu nhận thưởng...</p>
+          <div class="animate-spin w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full mx-auto mb-6"></div>
+          <p class="text-xl">Đang xử lý yêu cầu nhận thưởng...</p>
         </div>
       `;
+      document.getElementById('mainContent').appendChild(resultDiv);
 
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1600));
+      await new Promise(r => setTimeout(r, 1800));
 
-        resultDiv.innerHTML = `
-          <div class="text-center">
-            <i class="fas fa-check-circle text-6xl text-green-400 mb-5"></i>
-            <p class="text-2xl font-semibold text-green-400">Yêu cầu thành công!</p>
-            <p class="text-gray-300 mt-4">Hệ thống đã ghi nhận yêu cầu nhận thưởng của bạn.</p>
-            <p class="text-sm text-gray-400 mt-6">Vui lòng chờ duyệt từ YeuMoney.</p>
-          </div>
-        `;
-      } catch (err) {
-        resultDiv.innerHTML = `
-          <p class="text-red-400 text-center text-lg">❌ Có lỗi xảy ra. Vui lòng thử lại.</p>
-        `;
-      }
+      resultDiv.innerHTML = `
+        <div class="text-center">
+          <i class="fas fa-check-circle text-6xl text-green-400 mb-5"></i>
+          <p class="text-2xl font-semibold text-green-400">Nhận thưởng thành công!</p>
+          <p class="text-gray-300 mt-4">Cảm ơn bạn đã tham gia.</p>
+        </div>
+      `;
     }
+
+    // Kiểm tra khi load trang
+    window.onload = () => {
+      const token = getUrlParameter('token');
+      document.getElementById('loading').classList.remove('hidden');
+
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hidden');
+
+        if (token && token.length > 15) {
+          document.getElementById('success').classList.remove('hidden');
+
+          // Kiểm tra đã liên kết Discord chưa
+          if (isDiscordLinked()) {
+            document.getElementById('discordBtn').classList.add('hidden');
+            document.getElementById('discordStatus').classList.remove('hidden');
+          }
+        } else {
+          document.getElementById('error').classList.remove('hidden');
+        }
+      }, 800);
+    };
   </script>
 </body>
 </html>
