@@ -16,33 +16,22 @@
     
     <div id="loading" class="hidden">
       <div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-6"></div>
-      <p>Đang kiểm tra...</p>
+      <p>Đang kiểm tra quyền truy cập...</p>
     </div>
 
     <div id="error" class="hidden">
       <i class="fas fa-ban text-6xl text-red-500 mb-6"></i>
       <h1 class="text-3xl font-bold text-red-400">Truy cập bị từ chối</h1>
-      <p class="text-gray-400 mt-4">Link này không hợp lệ hoặc đã hết hạn.<br>Vui lòng dùng lệnh /vuotlink trong Discord.</p>
+      <p class="text-gray-400 mt-4">Link này không hợp lệ hoặc đã hết hạn.<br>Vui lòng dùng lệnh /vuotlink trong Discord để lấy link mới.</p>
     </div>
 
     <div id="success" class="hidden">
       <i class="fas fa-gift text-7xl text-yellow-400 mb-6"></i>
       <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
-      <p class="text-gray-400 mt-2">YeuMoney</p>
+      <p class="text-gray-400 mt-3">YeuMoney</p>
 
-      <!-- Nút Liên kết Discord -->
-      <div id="discordSection" class="mt-8">
-        <button onclick="linkDiscord()" id="discordBtn"
-                class="w-full bg-[#5865F2] hover:bg-[#4752C4] transition-all py-4 rounded-2xl text-lg font-semibold flex items-center justify-center gap-3">
-          <i class="fab fa-discord text-2xl"></i>
-          LIÊN KẾT DISCORD ĐỂ NHẬN QUÀ
-        </button>
-        <p id="discordStatus" class="text-green-400 text-sm mt-3 hidden">✅ Đã liên kết Discord</p>
-      </div>
-
-      <!-- Nút Nhận Thưởng -->
-      <button onclick="claimReward()" id="claimBtn"
-              class="w-full mt-6 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 
+      <button onclick="claimReward()" 
+              class="w-full mt-10 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 
                      transition-all py-6 rounded-2xl text-2xl font-bold shadow-xl flex items-center justify-center gap-4 text-black">
         <i class="fas fa-hand-holding-dollar text-3xl"></i>
         NHẬN THƯỞNG
@@ -51,31 +40,12 @@
   </div>
 
   <script>
-    function getUrlParameter(name) {
+    function hasValidParam() {
       const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
-
-    function isDiscordLinked() {
-      return localStorage.getItem('discord_linked') === 'true';
-    }
-
-    function linkDiscord() {
-      // Giả lập liên kết Discord
-      localStorage.setItem('discord_linked', 'true');
-      
-      document.getElementById('discordBtn').classList.add('hidden');
-      document.getElementById('discordStatus').classList.remove('hidden');
-      
-      alert("✅ Liên kết Discord thành công!\nBạn có thể nhận thưởng ngay bây giờ.");
+      return urlParams.has('t') || urlParams.has('token');
     }
 
     async function claimReward() {
-      if (!isDiscordLinked()) {
-        alert("❌ Bạn phải liên kết Discord trước khi nhận thưởng!");
-        return;
-      }
-
       const resultDiv = document.createElement('div');
       resultDiv.className = "mt-8 glass rounded-2xl p-8";
       resultDiv.innerHTML = `
@@ -86,7 +56,7 @@
       `;
       document.getElementById('mainContent').appendChild(resultDiv);
 
-      await new Promise(r => setTimeout(r, 1800));
+      await new Promise(r => setTimeout(r, 1500));
 
       resultDiv.innerHTML = `
         <div class="text-center">
@@ -97,22 +67,14 @@
       `;
     }
 
-    // Kiểm tra khi load trang
     window.onload = () => {
-      const token = getUrlParameter('token');
       document.getElementById('loading').classList.remove('hidden');
 
       setTimeout(() => {
         document.getElementById('loading').classList.add('hidden');
 
-        if (token && token.length > 15) {
+        if (hasValidParam()) {
           document.getElementById('success').classList.remove('hidden');
-
-          // Kiểm tra đã liên kết Discord chưa
-          if (isDiscordLinked()) {
-            document.getElementById('discordBtn').classList.add('hidden');
-            document.getElementById('discordStatus').classList.remove('hidden');
-          }
         } else {
           document.getElementById('error').classList.remove('hidden');
         }
