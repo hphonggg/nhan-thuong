@@ -2,19 +2,21 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Claim Rewards | System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward System | Secure Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             font-family: 'Outfit', sans-serif;
-            background: #0a0a0c;
+            background-color: #0a0a0c;
             background-image: radial-gradient(circle at 20% 30%, #1a1a2e 0%, transparent 50%),
                               radial-gradient(circle at 80% 70%, #16213e 0%, transparent 50%);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            color: #fff;
             overflow: hidden;
         }
 
@@ -26,12 +28,13 @@
             backdrop-filter: blur(20px);
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             text-align: center;
+            width: 90%;
             max-width: 400px;
-            transition: 0.5s;
+            transition: all 0.5s ease;
         }
 
-        h2 { color: #fff; font-size: 2rem; margin-bottom: 10px; }
-        p { color: #a0a0a0; margin-bottom: 30px; font-weight: 300; }
+        h2 { font-size: 2rem; margin-bottom: 10px; letter-spacing: -1px; }
+        p { color: #a0a0a0; margin-bottom: 30px; font-weight: 300; line-height: 1.6; }
 
         .btn {
             padding: 18px 40px;
@@ -41,32 +44,35 @@
             letter-spacing: 2px;
             cursor: pointer;
             border: none;
-            transition: 0.4s;
+            transition: all 0.4s ease;
             width: 100%;
             color: #fff;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        /* Nút Liên kết - Màu Tím Discord */
         .btn-link { background: linear-gradient(135deg, #7289da, #5865F2); box-shadow: 0 0 20px rgba(88, 101, 242, 0.4); }
         .btn-link:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(88, 101, 242, 0.6); }
 
-        /* Nút Nhận thưởng - Màu Neon Xanh lá */
         .btn-claim { background: linear-gradient(135deg, #00f2fe, #4facfe); box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); }
         .btn-claim:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 242, 254, 0.6); }
 
-        /* Hiệu ứng trôi nổi nhẹ */
-        .container:hover { transform: translateY(-5px); border-color: rgba(88, 101, 242, 0.3); }
+        .btn:disabled { background: #333; cursor: not-allowed; box-shadow: none; opacity: 0.6; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2 id="title">Reward System</h2>
-        <p id="desc">Vui lòng xác thực tài khoản để tiếp tục</p>
+        <p id="desc">Vui lòng xác thực tài khoản Discord để nhận thưởng độc quyền.</p>
         <div id="action-area"></div>
     </div>
 
     <script>
+        // CẤU HÌNH CỦA BẠN
+        const CLIENT_ID = 'YOUR_CLIENT_ID'; // Thay bằng Client ID từ Discord Developer Portal
+        const REDIRECT_URI = 'YOUR_GITHUB_PAGES_URL'; // Thay bằng link trang web của bạn
+
         const fragment = new URLSearchParams(window.location.hash.slice(1));
         const accessToken = fragment.get('access_token');
         const actionArea = document.getElementById('action-area');
@@ -74,11 +80,27 @@
         const desc = document.getElementById('desc');
 
         if (!accessToken) {
-            actionArea.innerHTML = `<button class="btn btn-link" onclick="window.location.href='https://discord.com/api/oauth2/authorize?client_id=YOUR_ID&redirect_uri=YOUR_URL&response_type=token&scope=identify'">Liên kết Discord</button>`;
+            // Nút Liên kết Discord
+            const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+            actionArea.innerHTML = `<a href="${authUrl}" class="btn btn-link">Liên kết Discord</a>`;
         } else {
+            // Nút Nhận thưởng
             title.innerText = "Sẵn sàng!";
-            desc.innerText = "Chào mừng thành viên, nhấn để nhận thưởng ngay.";
-            actionArea.innerHTML = `<button class="btn btn-claim" onclick="alert('Đã nhận!')">Nhận Thưởng</button>`;
+            desc.innerText = "Tài khoản của bạn đã được xác thực. Nhấn nút bên dưới để nhận thưởng.";
+            actionArea.innerHTML = `<button class="btn btn-claim" onclick="claimReward('${accessToken}')" id="claimBtn">Nhận Thưởng</button>`;
+        }
+
+        async function claimReward(token) {
+            const btn = document.getElementById('claimBtn');
+            btn.innerText = "ĐANG XỬ LÝ...";
+            btn.disabled = true;
+
+            // Ở đây bạn gọi API hoặc gửi dữ liệu về server/Google Sheet
+            // Sau khi nhận xong, hãy hiển thị thông báo
+            setTimeout(() => {
+                btn.innerText = "ĐÃ NHẬN THÀNH CÔNG";
+                alert("Chúc mừng! Phần thưởng đã được gửi.");
+            }, 1500);
         }
     </script>
 </body>
