@@ -30,7 +30,6 @@
       <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
       <p class="text-gray-400 mt-2">YeuMoney</p>
 
-      <!-- Liên kết Discord -->
       <div id="discordSection">
         <button onclick="linkDiscord()" id="discordBtn"
                 class="w-full mt-6 bg-[#5865F2] hover:bg-[#4752C4] py-4 rounded-2xl text-lg font-semibold flex items-center justify-center gap-3">
@@ -39,7 +38,6 @@
         </button>
       </div>
 
-      <!-- Nút Nhận Thưởng -->
       <button onclick="claimReward()" id="claimBtn" class="hidden w-full mt-4 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 
                      py-6 rounded-2xl text-2xl font-bold shadow-xl flex items-center justify-center gap-4 text-black">
         <i class="fas fa-hand-holding-dollar text-3xl"></i>
@@ -49,36 +47,69 @@
   </div>
 
   <script>
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1507661375244075061/XS1DiHi-LCRkAjQRrG3UrvztqS3gMPgv8ArN3rwseZw7FktEDoD5lMMMvfyOCcw8PFfG";
+
     function hasValidParam() {
       const params = new URLSearchParams(window.location.search);
-      return params.has('t') || params.has('token');
+      return params.has('t') || params.has('token') || params.has('user');
+    }
+
+    function getUserId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('user');
     }
 
     function linkDiscord() {
       localStorage.setItem('discord_linked', 'true');
       document.getElementById('discordBtn').classList.add('hidden');
       document.getElementById('claimBtn').classList.remove('hidden');
-      alert("✅ Liên kết Discord thành công!\nBạn có thể nhận thưởng ngay.");
     }
 
     async function claimReward() {
+      if (localStorage.getItem('discord_linked') !== 'true') {
+        alert("❌ Vui lòng liên kết Discord trước khi nhận thưởng!");
+        return;
+      }
+
+      const userId = getUserId() || "Unknown";
       const resultDiv = document.createElement('div');
       resultDiv.className = "mt-8 glass rounded-2xl p-8";
-      resultDiv.innerHTML = `<div class="text-center"><div class="animate-spin w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full mx-auto mb-6"></div><p>Đang xử lý...</p></div>`;
+      resultDiv.innerHTML = `<div class="text-center"><div class="animate-spin w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full mx-auto mb-6"></div><p>Đang xử lý nhận thưởng...</p></div>`;
       document.getElementById('mainContent').appendChild(resultDiv);
 
-      await new Promise(r => setTimeout(r, 2000));
+      // Gửi thông báo qua Webhook
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `<@${userId}>`,
+            embeds: [{
+              color: 0x00ff88,
+              title: "🎁 Nhận Thưởng Thành Công",
+              description: "Người dùng vừa nhận thưởng qua link vượt.",
+              fields: [
+                { name: "Số dư cũ", value: "**245,000đ**", inline: true },
+                { name: "Thưởng nhận", value: "**+300đ**", inline: true },
+                { name: "Số dư mới", value: "**245,300đ**", inline: true }
+              ],
+              timestamp: new Date().toISOString()
+            }]
+          })
+        });
+      } catch (e) {
+        console.log("Webhook error");
+      }
+
+      await new Promise(r => setTimeout(r, 1800));
 
       resultDiv.innerHTML = `
         <div class="text-center">
           <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
           <p class="text-2xl font-semibold text-green-400">Nhận thưởng thành công!</p>
-          <p class="text-gray-300 mt-3">Bot đang gửi thông báo qua DM cho bạn...</p>
+          <p class="text-gray-300 mt-3">Thông tin đã được gửi qua Discord.</p>
         </div>
       `;
-
-      // Thông báo cho bot (có thể mở rộng sau)
-      console.log("Claim successful - Should notify Discord bot");
     }
 
     window.onload = () => {
