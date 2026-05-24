@@ -2,32 +2,69 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Reward Portal</title>
+    <title>Reward Claimed | Success</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #0a0a0c; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
-        .box { text-align: center; padding: 40px; background: #16161a; border-radius: 20px; }
-        .btn { padding: 15px 30px; background: #5865F2; color: white; border-radius: 10px; text-decoration: none; display: inline-block; }
+        body {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background: #0a0a0c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        .card {
+            background: rgba(18, 18, 22, 0.8);
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 242, 254, 0.3); /* Viền neon nhẹ */
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 40px rgba(0, 242, 254, 0.15);
+            text-align: center;
+            width: 320px;
+        }
+
+        .icon { font-size: 3rem; margin-bottom: 10px; }
+        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 1px; color: #00f2fe; }
+        p { color: #a0a0a0; font-size: 0.9rem; margin: 15px 0 30px; }
+
+        .btn-close {
+            background: transparent;
+            border: 2px solid #5865F2;
+            color: #5865F2;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-close:hover {
+            background: #5865F2;
+            color: white;
+            box-shadow: 0 0 20px rgba(88, 101, 242, 0.5);
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2 id="title">Reward System</h2>
-        <div id="action">Đang kiểm tra...</div>
+
+    <div class="card">
+        <div class="icon">✨</div>
+        <h1>Hoàn tất</h1>
+        <p>Phần thưởng đã được ghi nhận vào hệ thống của bạn.</p>
+        <button class="btn-close" onclick="window.close()">Đóng</button>
     </div>
+
     <script>
-        const CLIENT_ID = '1401137325043617922';
-        const REDIRECT_URI = 'https://hphonggg.github.io/nhan-thuong/';
-        
-        const fragment = new URLSearchParams(window.location.hash.slice(1));
-        const accessToken = fragment.get('access_token');
-        
-        if (!accessToken) {
-            document.getElementById('action').innerHTML = 
-                `<a href="https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify" class="btn">Liên kết Discord</a>`;
-        } else {
-            document.getElementById('title').innerText = "Đã xác thực!";
-            document.getElementById('action').innerHTML = `<button class="btn" onclick="alert('Đang trao quà...')">Nhận Thưởng</button>`;
-        }
+        // Lưu ý: window.close() chỉ hoạt động nếu cửa sổ này 
+        // được mở bởi một trang khác qua lệnh window.open().
+        // Nếu mở trực tiếp, nó sẽ không đóng được do chính sách bảo mật trình duyệt.
+        // Bạn có thể đổi thành: window.location.href = 'about:blank';
     </script>
 </body>
 </html>
