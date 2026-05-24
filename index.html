@@ -2,102 +2,31 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reward System | Secure Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
+    <title>Reward Portal</title>
     <style>
-        body {
-            margin: 0;
-            font-family: 'Outfit', sans-serif;
-            background-color: #0a0a0c;
-            background-image: radial-gradient(circle at 20% 30%, #1a1a2e 0%, transparent 50%),
-                              radial-gradient(circle at 80% 70%, #16213e 0%, transparent 50%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            overflow: hidden;
-        }
-
-        .container {
-            background: rgba(18, 18, 22, 0.7);
-            padding: 50px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-            transition: all 0.5s ease;
-        }
-
-        h2 { font-size: 2rem; margin-bottom: 10px; letter-spacing: -1px; }
-        p { color: #a0a0a0; margin-bottom: 30px; font-weight: 300; line-height: 1.6; }
-
-        .btn {
-            padding: 18px 40px;
-            border-radius: 15px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.4s ease;
-            width: 100%;
-            color: #fff;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-link { background: linear-gradient(135deg, #7289da, #5865F2); box-shadow: 0 0 20px rgba(88, 101, 242, 0.4); }
-        .btn-link:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(88, 101, 242, 0.6); }
-
-        .btn-claim { background: linear-gradient(135deg, #00f2fe, #4facfe); box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); }
-        .btn-claim:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 242, 254, 0.6); }
-
-        .btn:disabled { background: #333; cursor: not-allowed; box-shadow: none; opacity: 0.6; }
+        body { background: #0a0a0c; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+        .box { text-align: center; padding: 40px; background: #16161a; border-radius: 20px; }
+        .btn { padding: 15px 30px; background: #5865F2; color: white; border-radius: 10px; text-decoration: none; display: inline-block; }
     </style>
 </head>
 <body>
-
-    <div class="container">
+    <div class="box">
         <h2 id="title">Reward System</h2>
-        <p id="desc">Vui lòng xác thực tài khoản Discord để nhận thưởng độc quyền.</p>
-        <div id="action-area"></div>
+        <div id="action">Đang kiểm tra...</div>
     </div>
-
     <script>
         const CLIENT_ID = '1401137325043617922';
         const REDIRECT_URI = 'https://hphonggg.github.io/nhan-thuong/';
-
+        
         const fragment = new URLSearchParams(window.location.hash.slice(1));
         const accessToken = fragment.get('access_token');
-        const actionArea = document.getElementById('action-area');
-        const title = document.getElementById('title');
-        const desc = document.getElementById('desc');
-
+        
         if (!accessToken) {
-            // Thay đổi sang response_type=token để phù hợp với code tĩnh
-            const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
-            actionArea.innerHTML = `<a href="${authUrl}" class="btn btn-link">Liên kết Discord</a>`;
+            document.getElementById('action').innerHTML = 
+                `<a href="https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify" class="btn">Liên kết Discord</a>`;
         } else {
-            title.innerText = "Sẵn sàng!";
-            desc.innerText = "Tài khoản đã xác thực thành công. Nhấn nút bên dưới để nhận thưởng.";
-            actionArea.innerHTML = `<button class="btn btn-claim" onclick="claimReward()" id="claimBtn">Nhận Thưởng</button>`;
-        }
-
-        function claimReward() {
-            const btn = document.getElementById('claimBtn');
-            btn.innerText = "ĐANG XỬ LÝ...";
-            btn.disabled = true;
-
-            // Tại đây sau này bạn có thể gọi API để kiểm tra ID trong DB
-            setTimeout(() => {
-                btn.innerText = "ĐÃ NHẬN THÀNH CÔNG";
-                alert("Chúc mừng! Phần thưởng đã được gửi tới tài khoản của bạn.");
-            }, 1500);
+            document.getElementById('title').innerText = "Đã xác thực!";
+            document.getElementById('action').innerHTML = `<button class="btn" onclick="alert('Đang trao quà...')">Nhận Thưởng</button>`;
         }
     </script>
 </body>
