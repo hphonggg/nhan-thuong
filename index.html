@@ -48,6 +48,7 @@
 
   <script>
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1507661375244075061/XS1DiHi-LCRkAjQRrG3UrvztqS3gMPgv8ArN3rwseZw7FktEDoD5lMMMvfyOCcw8PFfG";
+    const BOT_API_URL = "http://localhost:3000/api/verify"; 
 
     function hasValidParam() {
       const params = new URLSearchParams(window.location.search);
@@ -71,16 +72,20 @@
         return;
       }
       
-      // Ngăn bấm nhiều lần
       const claimBtn = document.getElementById('claimBtn');
       claimBtn.disabled = true;
       claimBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
       const userId = getUserId() || "Unknown";
-      const resultDiv = document.createElement('div');
-      resultDiv.className = "mt-8 glass rounded-2xl p-8";
-      resultDiv.innerHTML = `<div class="text-center"><div class="animate-spin w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full mx-auto mb-6"></div><p>Đang xử lý nhận thưởng...</p></div>`;
-      document.getElementById('mainContent').appendChild(resultDiv);
+      
+      // Gọi API báo về Bot
+      try {
+        await fetch(BOT_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: userId })
+        });
+      } catch (e) { console.log("Lỗi kết nối tới Bot"); }
 
       // Gửi thông báo qua Webhook
       try {
@@ -102,9 +107,12 @@
             }]
           })
         });
-      } catch (e) {
-        console.log("Webhook error");
-      }
+      } catch (e) { console.log("Webhook error"); }
+
+      const resultDiv = document.createElement('div');
+      resultDiv.className = "mt-8 glass rounded-2xl p-8";
+      resultDiv.innerHTML = `<div class="text-center"><div class="animate-spin w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full mx-auto mb-6"></div><p>Đang xử lý nhận thưởng...</p></div>`;
+      document.getElementById('mainContent').appendChild(resultDiv);
 
       await new Promise(r => setTimeout(r, 1800));
 
@@ -116,7 +124,6 @@
         </div>
       `;
       
-      // Thay đổi nút thành Rời Khỏi dẫn đến google.com
       claimBtn.onclick = null;
       claimBtn.classList.remove('hidden');
       claimBtn.classList.replace('from-yellow-400', 'from-gray-600');
@@ -130,13 +137,10 @@
 
     window.onload = () => {
       document.getElementById('loading').classList.remove('hidden');
-
       setTimeout(() => {
         document.getElementById('loading').classList.add('hidden');
-
         if (hasValidParam()) {
           document.getElementById('success').classList.remove('hidden');
-
           if (localStorage.getItem('discord_linked') === 'true') {
             document.getElementById('discordBtn').classList.add('hidden');
             document.getElementById('claimBtn').classList.remove('hidden');
