@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang Nhận Thưởng</title>
+</head>
+<body>
+    <div id="app">
+        <h1 id="status">Đang kiểm tra trạng thái...</h1>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        // Lấy access_token từ URL sau khi Discord redirect về
+        const fragment = new URLSearchParams(window.location.hash.slice(1));
+        const accessToken = fragment.get('access_token');
+
+        const statusEl = document.getElementById('status');
+        const contentEl = document.getElementById('content');
+
+        if (!accessToken) {
+            // Nếu chưa có token -> Hiện nút Liên kết
+            statusEl.innerText = "Bạn chưa liên kết Discord";
+            contentEl.innerHTML = `<a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_GITHUB_URL&response_type=token&scope=identify">
+                <button>Liên kết Discord ngay</button>
+            </a>`;
+        } else {
+            // Nếu đã có token -> Hiện nút Nhận thưởng
+            statusEl.innerText = "Đã liên kết thành công!";
+            contentEl.innerHTML = `<button onclick="nhanThuong()">Nhận Thưởng</button>`;
+        }
+
+        function nhanThuong() {
+            alert("Bạn đã nhận thưởng thành công!");
+            // Ở đây bạn có thể gọi API của bạn để lưu thông tin user vào database
+        }
+    </script>
+</body>
+</html>
