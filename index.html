@@ -48,7 +48,7 @@
 
   <script>
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1507661375244075061/XS1DiHi-LCRkAjQRrG3UrvztqS3gMPgv8ArN3rwseZw7FktEDoD5lMMMvfyOCcw8PFfG";
-    const BOT_API_URL = "http://localhost:3000/api/verify"; 
+    const BOT_API_URL = "http://localhost:3000/api/verify";
 
     function hasValidParam() {
       const params = new URLSearchParams(window.location.search);
@@ -61,6 +61,7 @@
     }
 
     function linkDiscord() {
+      // Logic liên kết (bạn có thể thay thế bằng link oauth2 thực tế của bạn)
       localStorage.setItem('discord_linked', 'true');
       document.getElementById('discordBtn').classList.add('hidden');
       document.getElementById('claimBtn').classList.remove('hidden');
@@ -78,7 +79,7 @@
 
       const userId = getUserId() || "Unknown";
       
-      // Gọi API báo về Bot
+      // Gửi tín hiệu về bot
       try {
         await fetch(BOT_API_URL, {
           method: 'POST',
@@ -87,7 +88,7 @@
         });
       } catch (e) { console.log("Lỗi kết nối tới Bot"); }
 
-      // Gửi thông báo qua Webhook
+      // Gửi thông báo Webhook
       try {
         await fetch(WEBHOOK_URL, {
           method: 'POST',
