@@ -16,7 +16,9 @@
     </div>
 
     <script>
-        const API_BASE_URL = "[https://bot.cyerox.fun:3055](https://bot.cyerox.fun:3055)"; 
+        // Sửa lại cú pháp URL cho chuẩn
+        const API_BASE_URL = "https://bot.cyerox.fun:3055"; 
+        
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user');
         const token = urlParams.get('token');
@@ -37,10 +39,12 @@
                 if(data.status === "success") {
                     statusText.innerText = "✅ Thành công! Đang chờ duyệt...";
                 } else {
-                    statusText.innerText = "❌ Lỗi xác thực!";
+                    statusText.innerText = "❌ Lỗi: " + (data.message || "Xác thực thất bại");
                 }
             } catch (err) {
+                // Để biết chính xác lỗi, bạn hãy mở F12 -> tab Console trên trình duyệt
                 statusText.innerText = "❌ Lỗi kết nối máy chủ!";
+                console.error("Chi tiết lỗi:", err);
             }
         }
         verify();
