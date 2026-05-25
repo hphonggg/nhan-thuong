@@ -1,84 +1,93 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Nhận Thưởng - Kiếm Lúa YeuMoney</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>
-    body { background: linear-gradient(135deg, #0f172a, #1e2937); }
-    .glass { background: rgba(255,255,255,0.09); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhận Thưởng</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0;
+            background-color: #11141c;
+            color: #ffffff;
+        }
+        .card {
+            background: #1c212e;
+            padding: 50px; 
+            border-radius: 15px;
+            border: 1px solid #30364d;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 350px;
+        }
+        h1 { font-size: 24px; margin-bottom: 20px; }
+        p { color: #a0a0a0; margin-bottom: 30px; }
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s, background-color 0.2s;
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        #btn-nhan { background-color: #28a745; color: white; }
+        #btn-nhan:hover { background-color: #218838; transform: scale(1.05); }
+        #btn-roi { background-color: #555; color: #ccc; cursor: not-allowed; }
+        #btn-roi.active { background-color: #dc3545; color: white; cursor: pointer; }
+        #btn-roi.active:hover { background-color: #c82333; transform: scale(1.05); }
+    </style>
 </head>
-<body class="min-h-screen text-white flex items-center justify-center p-4">
-  <div class="max-w-md w-full glass rounded-3xl p-10 text-center">
-    
-    <div id="errorArea" class="hidden">
-      <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
-      <h2 class="text-2xl font-bold">Truy cập không hợp lệ!</h2>
-      <p class="text-gray-400 mt-2">Bạn không đủ điều kiện để nhận quà từ hệ thống.</p>
+<body>
+    <div class="card">
+        <h1>Chúc mừng bạn!</h1>
+        <p>Nhận Lúa Ngay 🌾</p>
+        <button id="btn-nhan" class="btn">Nhận Lúa 🌾</button>
+        <button id="btn-roi" class="btn" disabled>Rời khỏi</button>
     </div>
 
-    <div id="mainContent">
-      <div id="loading"><div class="animate-spin w-10 h-10 border-4 border-yellow-400 rounded-full mx-auto"></div></div>
-      
-      <div id="content" class="hidden">
-        <div id="checkArea" class="hidden">
-            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-check text-4xl"></i></div>
-            <h2 class="text-2xl font-bold" id="statusTitle">Nhận thưởng thành công!</h2>
-        </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user');
+        const token = urlParams.get('token');
 
-        <div id="actionArea">
-          <h1 class="text-3xl font-bold mb-6" id="titleText">Xác nhận nhận quà</h1>
-          <button id="discordBtn" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&scope=identify'" class="hidden w-full bg-[#5865F2] py-4 rounded-xl font-bold">LIÊN KẾT DISCORD</button>
-          <button id="claimBtn" onclick="claimReward()" class="hidden w-full bg-yellow-500 py-4 rounded-xl font-bold text-black">Nhận Lúa 🌾</button>
-        </div>
+        document.getElementById('btn-nhan').addEventListener('click', async () => {
+            if (!userId || !token) {
+                alert("Link không hợp lệ hoặc đã hết hạn!");
+                return;
+            }
 
-        <button id="exitBtn" onclick="window.location.href='https://google.com'" class="hidden w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-xl font-bold mt-6">RỜI KHỎI</button>
-      </div>
-    </div>
-  </div>
+            try {
+                const res = await fetch('https://hphonggg.github.io/nhan-thuong/api/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, token })
+                });
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const userId = params.get('user');
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert("Vượt link thành công! Đang chờ admin duyệt.");
+                    
+                    // Vô hiệu hóa nút Nhận Lúa
+                    document.getElementById('btn-nhan').disabled = true;
+                    document.getElementById('btn-nhan').innerText = "Đã gửi yêu cầu";
 
-    async function init() {
-      // Kiểm tra nếu không có userId thì là truy cập trái phép
-      if (!userId) {
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('errorArea').classList.remove('hidden');
-        return;
-      }
-
-      if (code) {
-        await fetch('http://localhost:3000/api/auth', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ code, userId }) });
-        location.href = `https://hphonggg.github.io/nhan-thuong/?user=${userId}`;
-        return;
-      }
-
-      const res = await (await fetch(`http://localhost:3000/api/check-link/${userId}`)).json();
-      document.getElementById('loading').classList.add('hidden');
-      document.getElementById('content').classList.remove('hidden');
-      
-      if (res.linked) {
-        document.getElementById('titleText').innerText = "Chúc mừng bạn!";
-        document.getElementById('claimBtn').classList.remove('hidden');
-      } else {
-        document.getElementById('discordBtn').classList.remove('hidden');
-      }
-    }
-
-    async function claimReward() {
-        document.getElementById('actionArea').classList.add('hidden');
-        document.getElementById('checkArea').classList.remove('hidden');
-        await fetch('http://localhost:3000/api/verify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId }) });
-        
-        // Hiện nút Rời khỏi màu xanh dương
-        document.getElementById('exitBtn').classList.remove('hidden');
-    }
-    init();
-  </script>
+                    // Kích hoạt nút Rời khỏi
+                    const btnRoi = document.getElementById('btn-roi');
+                    btnRoi.disabled = false;
+                    btnRoi.classList.add('active');
+                    btnRoi.onclick = () => window.location.href = 'https://google.com';
+                } else {
+                    alert("Lỗi: Token đã hết hạn hoặc không hợp lệ!");
+                }
+            } catch (err) {
+                alert("Không thể kết nối tới máy chủ.");
+            }
+        });
+    </script>
 </body>
 </html>
