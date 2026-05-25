@@ -16,8 +16,8 @@
     </div>
 
     <script>
-        // Cập nhật kết nối trực tiếp đến IP máy chủ
-        const API_BASE_URL = "http://185.150.1.56:3055"; 
+        // Sử dụng tên miền đã được cấu hình trong bảng Network của bạn
+        const API_BASE_URL = "https://bot.cyerox.fun:3055"; 
         
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user');
@@ -43,7 +43,7 @@
                     statusText.innerText = "❌ Lỗi: " + (data.message || "Xác thực thất bại");
                 }
             } catch (err) {
-                statusText.innerText = "❌ Lỗi kết nối tới server (Check Firewall/Port)";
+                statusText.innerText = "❌ Lỗi kết nối tới server";
                 console.error("Chi tiết lỗi:", err);
             }
         }
