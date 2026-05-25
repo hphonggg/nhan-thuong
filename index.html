@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Nhận Thưởng - YeuMoney</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     body { background: linear-gradient(135deg, #0f172a, #1e2937); }
     .glass { background: rgba(255,255,255,0.09); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); }
@@ -11,40 +12,69 @@
 </head>
 <body class="min-h-screen text-white flex items-center justify-center p-4">
   <div class="max-w-md w-full glass rounded-3xl p-10 shadow-2xl text-center" id="mainContent">
-    <div id="loading"><div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto"></div></div>
+    <div id="loading">
+      <div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-6"></div>
+      <p>Đang kiểm tra trạng thái...</p>
+    </div>
+
     <div id="success" class="hidden">
+      <i class="fas fa-gift text-7xl text-yellow-400 mb-6"></i>
       <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
-      <button id="discordBtn" onclick="linkDiscord()" class="w-full bg-[#5865F2] py-4 rounded-xl mt-6 hidden">LIÊN KẾT DISCORD</button>
-      <button id="claimBtn" onclick="claimReward()" class="hidden w-full bg-yellow-500 py-4 rounded-xl mt-6">NHẬN THƯỞNG</button>
+      
+      <button id="discordBtn" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&scope=identify'" 
+              class="hidden w-full bg-[#5865F2] hover:bg-[#4752C4] py-4 rounded-2xl text-lg font-semibold mt-6">
+        <i class="fab fa-discord mr-2"></i> LIÊN KẾT DISCORD
+      </button>
+
+      <button id="claimBtn" onclick="claimReward()" class="hidden w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 py-6 rounded-2xl text-2xl font-bold text-black shadow-xl mt-6">
+        <i class="fas fa-hand-holding-dollar mr-2"></i> NHẬN THƯỞNG
+      </button>
     </div>
   </div>
 
   <script>
-    const userId = new URLSearchParams(window.location.search).get('user');
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const userId = urlParams.get('user');
 
-    async function checkStatus() {
-      const res = await fetch(`http://localhost:3000/api/check-link/${userId}`);
-      const data = await res.json();
-      document.getElementById('loading').classList.add('hidden');
-      document.getElementById('success').classList.remove('hidden');
-      if (data.linked) {
-        document.getElementById('claimBtn').classList.remove('hidden');
-      } else {
-        document.getElementById('discordBtn').classList.remove('hidden');
+    async function init() {
+      // 1. Nếu có code từ Discord gửi về, gửi về bot để xác thực
+      if (code && userId) {
+        const res = await fetch('http://localhost:3000/api/auth', { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify({ code, userId }) 
+        });
+        if ((await res.json()).status === 'success') {
+            window.location.href = `https://hphonggg.github.io/nhan-thuong/?user=${userId}`;
+        }
+      } 
+      // 2. Nếu không có code, kiểm tra database xem đã liên kết chưa
+      else if (userId) {
+        const res = await fetch(`http://localhost:3000/api/check-link/${userId}`);
+        const data = await res.json();
+        
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('success').classList.remove('hidden');
+        
+        if (data.linked) {
+          document.getElementById('claimBtn').classList.remove('hidden');
+        } else {
+          document.getElementById('discordBtn').classList.remove('hidden');
+        }
       }
     }
 
-    async function linkDiscord() {
-      await fetch('http://localhost:3000/api/link-discord', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId}) });
-      location.reload();
-    }
-
     async function claimReward() {
-      await fetch('http://localhost:3000/api/verify', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId}) });
+      await fetch('http://localhost:3000/api/verify', { 
+          method: 'POST', 
+          headers: {'Content-Type': 'application/json'}, 
+          body: JSON.stringify({ userId }) 
+      });
       window.location.href = 'https://google.com';
     }
 
-    window.onload = checkStatus;
+    window.onload = init;
   </script>
 </body>
 </html>
