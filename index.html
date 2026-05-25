@@ -16,8 +16,8 @@
     </div>
 
     <script>
-        // Đã chuyển sang http để tránh lỗi SSL/HTTPS
-        const API_BASE_URL = "http://bot.cyerox.fun:3055"; 
+        // Cấu hình API sử dụng cổng 2053 (hỗ trợ Cloudflare Proxy)
+        const API_URL = "https://bot.cyerox.fun:2053/api/verify";
         
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user');
@@ -30,23 +30,25 @@
                 return;
             }
             try {
-                const res = await fetch(`${API_BASE_URL}/api/verify`, { 
+                const res = await fetch(API_URL, { 
                     method: 'POST', 
-                    mode: 'cors',
                     headers: {'Content-Type': 'application/json'}, 
                     body: JSON.stringify({ userId, token })
                 });
+                
                 const data = await res.json();
+                
                 if(data.status === "success") {
                     statusText.innerText = "✅ Thành công! Đang chờ duyệt...";
                 } else {
                     statusText.innerText = "❌ Lỗi: " + (data.message || "Xác thực thất bại");
                 }
             } catch (err) {
-                statusText.innerText = "❌ Lỗi kết nối tới server";
+                statusText.innerText = "❌ Lỗi kết nối server!";
                 console.error("Chi tiết lỗi:", err);
             }
         }
+        
         verify();
     </script>
 </body>
