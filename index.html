@@ -2,53 +2,49 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống nhận thưởng</title>
+    <title>Xác thực tài khoản</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #11141c; color: #ffffff; }
-        .card { background: #1c212e; padding: 40px; border-radius: 15px; border: 1px solid #30364d; text-align: center; width: 350px; }
-        #status-text { font-size: 1.2em; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #11141c; color: #ffffff; }
+        .card { background: #1c212e; padding: 40px; border-radius: 15px; border: 1px solid #30364d; text-align: center; }
+        button { background: #5865F2; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1 id="status-text">Đang xác thực...</h1>
+        <h1 id="status-text">Đang kiểm tra...</h1>
+        <div id="action-area"></div>
     </div>
 
     <script>
-        // Cấu hình API sử dụng cổng 2053 (hỗ trợ Cloudflare Proxy)
         const API_URL = "https://bot.cyerox.fun/api/verify";
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('user');
-        const token = urlParams.get('token');
-        const statusText = document.getElementById('status-text');
+        // Link OAuth2 đã được tự động thay thế
+        const OAUTH_URL = "https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&scope=identify";
 
         async function verify() {
-            if (!userId || !token) {
-                statusText.innerText = "Thiếu thông tin xác thực!";
-                return;
-            }
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('user');
+            const token = urlParams.get('token');
+
             try {
                 const res = await fetch(API_URL, { 
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'}, 
                     body: JSON.stringify({ userId, token })
                 });
-                
                 const data = await res.json();
                 
-                if(data.status === "success") {
-                    statusText.innerText = "✅ Thành công! Đang chờ duyệt...";
+                if(data.status === "need_link") {
+                    document.getElementById('status-text').innerText = "Bạn chưa liên kết tài khoản!";
+                    document.getElementById('action-area').innerHTML = `<button onclick="window.location.href='${OAUTH_URL}'">Liên kết Discord</button>`;
+                } else if(data.status === "success") {
+                    document.getElementById('status-text').innerText = "✅ Thành công! Bạn đã nhận lúa.";
                 } else {
-                    statusText.innerText = "❌ Lỗi: " + (data.message || "Xác thực thất bại");
+                    document.getElementById('status-text').innerText = "Lỗi: " + data.message;
                 }
             } catch (err) {
-                statusText.innerText = "❌ Lỗi kết nối server!";
-                console.error("Chi tiết lỗi:", err);
+                document.getElementById('status-text').innerText = "Lỗi kết nối server!";
             }
         }
-        
         verify();
     </script>
 </body>
