@@ -16,8 +16,8 @@
     </div>
 
     <script>
-        // Địa chỉ kết nối đến bot của bạn trên cổng 3055
-        const API_BASE_URL = "https://bot.cyerox.fun:3055"; 
+        // Nếu https bị từ chối (ERR_CONNECTION_REFUSED), hãy đổi thành http://bot.cyerox.fun:3055
+        const API_BASE_URL = "http://bot.cyerox.fun:3055"; 
         
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user');
@@ -30,6 +30,7 @@
                 return;
             }
             try {
+                console.log("Đang thử kết nối tới:", API_BASE_URL);
                 const res = await fetch(`${API_BASE_URL}/api/verify`, { 
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'}, 
@@ -42,7 +43,7 @@
                     statusText.innerText = "❌ Lỗi: " + (data.message || "Xác thực thất bại");
                 }
             } catch (err) {
-                statusText.innerText = "❌ Lỗi kết nối máy chủ!";
+                statusText.innerText = "❌ Lỗi kết nối tới: " + API_BASE_URL;
                 console.error("Chi tiết lỗi:", err);
             }
         }
