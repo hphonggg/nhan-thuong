@@ -2,33 +2,41 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Nhận Thưởng - YeuMoney</title>
+  <title>Nhận Thưởng</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     body { background: linear-gradient(135deg, #0f172a, #1e2937); }
     .glass { background: rgba(255,255,255,0.09); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); }
+    
+    /* Animation dấu tích */
+    .checkmark-circle { width: 80px; height: 80px; position: relative; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; animation: scaleUp 0.5s ease-in-out; }
+    .checkmark { color: white; font-size: 40px; animation: drawCheck 0.5s ease-in-out 0.5s forwards; opacity: 0; }
+    @keyframes scaleUp { from { transform: scale(0); } to { transform: scale(1); } }
+    @keyframes drawCheck { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body class="min-h-screen text-white flex items-center justify-center p-4">
-  <div class="max-w-md w-full glass rounded-3xl p-10 shadow-2xl text-center" id="mainContent">
-    <div id="loading">
-      <div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-6"></div>
-      <p>Đang kiểm tra trạng thái...</p>
-    </div>
+  <div class="max-w-md w-full glass rounded-3xl p-10 text-center">
+    <div id="loading"><div class="animate-spin w-10 h-10 border-4 border-yellow-400 rounded-full mx-auto"></div></div>
+    
+    <div id="content" class="hidden">
+      <div id="checkArea" class="hidden">
+          <div class="checkmark-circle"><i class="fas fa-check checkmark"></i></div>
+          <h2 class="text-2xl font-bold">Thành công!</h2>
+      </div>
 
-    <div id="success" class="hidden">
-      <i class="fas fa-gift text-7xl text-yellow-400 mb-6"></i>
-      <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
-      
-      <button id="discordBtn" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&scope=identify'" 
-              class="hidden w-full bg-[#5865F2] hover:bg-[#4752C4] py-4 rounded-2xl text-lg font-semibold mt-6">
-        <i class="fab fa-discord mr-2"></i> LIÊN KẾT DISCORD
-      </button>
+      <div id="actionArea">
+          <h1 class="text-3xl font-bold mb-6" id="titleText">Vui lòng liên kết</h1>
+          <button id="discordBtn" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&scope=identify'" 
+                  class="hidden w-full bg-[#5865F2] py-4 rounded-xl font-bold transition hover:scale-105">
+            <i class="fab fa-discord mr-2"></i> LIÊN KẾT DISCORD
+          </button>
 
-      <button id="claimBtn" onclick="claimReward()" class="hidden w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 py-6 rounded-2xl text-2xl font-bold text-black shadow-xl mt-6">
-        <i class="fas fa-hand-holding-dollar mr-2"></i> NHẬN THƯỞNG
-      </button>
+          <button id="claimBtn" onclick="claimReward()" class="hidden w-full bg-yellow-500 py-4 rounded-xl font-bold text-black transition hover:scale-105">
+            <i class="fas fa-gift mr-2"></i> NHẬN THƯỞNG 300Đ
+          </button>
+      </div>
     </div>
   </div>
 
@@ -38,26 +46,20 @@
     const userId = urlParams.get('user');
 
     async function init() {
-      // 1. Nếu có code từ Discord gửi về, gửi về bot để xác thực
       if (code && userId) {
-        const res = await fetch('http://localhost:3000/api/auth', { 
-            method: 'POST', 
-            headers: {'Content-Type': 'application/json'}, 
-            body: JSON.stringify({ code, userId }) 
-        });
-        if ((await res.json()).status === 'success') {
-            window.location.href = `https://hphonggg.github.io/nhan-thuong/?user=${userId}`;
-        }
-      } 
-      // 2. Nếu không có code, kiểm tra database xem đã liên kết chưa
-      else if (userId) {
+        await fetch('http://localhost:3000/api/auth', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ code, userId }) });
+        window.location.href = `https://hphonggg.github.io/nhan-thuong/?user=${userId}`;
+        return;
+      }
+
+      if (userId) {
         const res = await fetch(`http://localhost:3000/api/check-link/${userId}`);
         const data = await res.json();
-        
         document.getElementById('loading').classList.add('hidden');
-        document.getElementById('success').classList.remove('hidden');
+        document.getElementById('content').classList.remove('hidden');
         
         if (data.linked) {
+          document.getElementById('titleText').innerText = "Sẵn sàng nhận thưởng";
           document.getElementById('claimBtn').classList.remove('hidden');
         } else {
           document.getElementById('discordBtn').classList.remove('hidden');
@@ -66,15 +68,16 @@
     }
 
     async function claimReward() {
-      await fetch('http://localhost:3000/api/verify', { 
-          method: 'POST', 
-          headers: {'Content-Type': 'application/json'}, 
-          body: JSON.stringify({ userId }) 
-      });
-      window.location.href = 'https://google.com';
+        document.getElementById('actionArea').classList.add('hidden');
+        document.getElementById('checkArea').classList.remove('hidden');
+        document.getElementById('titleText').classList.add('hidden');
+        
+        await fetch('http://localhost:3000/api/verify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId }) });
+        
+        // Đợi 2 giây cho animation chạy xong rồi chuyển hướng
+        setTimeout(() => { window.location.href = 'https://google.com'; }, 2000);
     }
-
-    window.onload = init;
+    init();
   </script>
 </body>
 </html>
