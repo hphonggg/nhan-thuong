@@ -1,40 +1,82 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8"><script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <title>Nhận Thưởng - YeuMoney</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>body { background: linear-gradient(135deg, #0f172a, #1e2937); } .glass { background: rgba(255,255,255,0.09); backdrop-filter: blur(12px); }</style>
+  <style>
+    body { background: linear-gradient(135deg, #0f172a, #1e2937); }
+    .glass { background: rgba(255,255,255,0.09); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); }
+  </style>
 </head>
 <body class="min-h-screen text-white flex items-center justify-center p-4">
   <div class="max-w-md w-full glass rounded-3xl p-10 text-center">
-    <div id="loading"><div class="animate-spin w-10 h-10 border-4 border-yellow-400 rounded-full mx-auto"></div></div>
-    <div id="content" class="hidden">
-      <div id="checkArea" class="hidden"><div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-check text-4xl"></i></div></div>
-      <div id="actionArea">
-        <h1 class="text-3xl font-bold mb-6" id="titleText">Xác nhận</h1>
-        <button id="discordBtn" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&scope=identify'" class="hidden w-full bg-[#5865F2] py-4 rounded-xl font-bold">LIÊN KẾT DISCORD</button>
-        <button id="claimBtn" onclick="claimReward()" class="hidden w-full bg-yellow-500 py-4 rounded-xl font-bold text-black">Nhận Thưởng</button>
+    
+    <div id="errorArea" class="hidden">
+      <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
+      <h2 class="text-2xl font-bold">Truy cập không hợp lệ!</h2>
+      <p class="text-gray-400 mt-2">Bạn không đủ điều kiện để nhận quà từ hệ thống.</p>
+    </div>
+
+    <div id="mainContent">
+      <div id="loading"><div class="animate-spin w-10 h-10 border-4 border-yellow-400 rounded-full mx-auto"></div></div>
+      
+      <div id="content" class="hidden">
+        <div id="checkArea" class="hidden">
+            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-check text-4xl"></i></div>
+            <h2 class="text-2xl font-bold" id="statusTitle">Nhận thưởng thành công!</h2>
+        </div>
+
+        <div id="actionArea">
+          <h1 class="text-3xl font-bold mb-6" id="titleText">Xác nhận nhận quà</h1>
+          <button id="discordBtn" onclick="window.location.href='https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&scope=identify'" class="hidden w-full bg-[#5865F2] py-4 rounded-xl font-bold">LIÊN KẾT DISCORD</button>
+          <button id="claimBtn" onclick="claimReward()" class="hidden w-full bg-yellow-500 py-4 rounded-xl font-bold text-black">NHẬN THƯỞNG 300Đ</button>
+        </div>
+
+        <button id="exitBtn" onclick="window.location.href='https://google.com'" class="hidden w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-xl font-bold mt-6">RỜI KHỎI</button>
       </div>
     </div>
   </div>
+
   <script>
     const params = new URLSearchParams(window.location.search);
-    const [code, userId] = [params.get('code'), params.get('user')];
+    const code = params.get('code');
+    const userId = params.get('user');
+
     async function init() {
-      if (code && userId) { await fetch('http://localhost:3000/api/auth', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ code, userId }) }); location.href = `https://hphonggg.github.io/nhan-thuong/?user=${userId}`; return; }
-      if (userId) {
-        const res = await (await fetch(`http://localhost:3000/api/check-link/${userId}`)).json();
+      // Kiểm tra nếu không có userId thì là truy cập trái phép
+      if (!userId) {
         document.getElementById('loading').classList.add('hidden');
-        document.getElementById('content').classList.remove('hidden');
-        if (res.linked) { document.getElementById('titleText').innerText = "Sẵn sàng"; document.getElementById('claimBtn').classList.remove('hidden'); }
-        else document.getElementById('discordBtn').classList.remove('hidden');
+        document.getElementById('errorArea').classList.remove('hidden');
+        return;
+      }
+
+      if (code) {
+        await fetch('http://localhost:3000/api/auth', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ code, userId }) });
+        location.href = `https://hphonggg.github.io/nhan-thuong/?user=${userId}`;
+        return;
+      }
+
+      const res = await (await fetch(`http://localhost:3000/api/check-link/${userId}`)).json();
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('content').classList.remove('hidden');
+      
+      if (res.linked) {
+        document.getElementById('titleText').innerText = "Chúc mừng bạn!";
+        document.getElementById('claimBtn').classList.remove('hidden');
+      } else {
+        document.getElementById('discordBtn').classList.remove('hidden');
       }
     }
+
     async function claimReward() {
         document.getElementById('actionArea').classList.add('hidden');
         document.getElementById('checkArea').classList.remove('hidden');
         await fetch('http://localhost:3000/api/verify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId }) });
-        setTimeout(() => { location.href = 'https://google.com'; }, 2000);
+        
+        // Hiện nút Rời khỏi màu xanh dương
+        document.getElementById('exitBtn').classList.remove('hidden');
     }
     init();
   </script>
