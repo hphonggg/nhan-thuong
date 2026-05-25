@@ -2,10 +2,8 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nhận Thưởng - YeuMoney</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     body { background: linear-gradient(135deg, #0f172a, #1e2937); }
     .glass { background: rgba(255,255,255,0.09); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); }
@@ -13,141 +11,39 @@
 </head>
 <body class="min-h-screen text-white flex items-center justify-center p-4">
   <div class="max-w-md w-full glass rounded-3xl p-10 shadow-2xl text-center" id="mainContent">
-    
-    <div id="loading" class="hidden">
-      <div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-6"></div>
-      <p>Đang kiểm tra...</p>
-    </div>
-
-    <div id="error" class="hidden">
-      <i class="fas fa-ban text-6xl text-red-500 mb-6"></i>
-      <h1 class="text-3xl font-bold text-red-400">Truy cập bị từ chối</h1>
-      <p class="text-gray-400 mt-4">Link này không hợp lệ hoặc đã hết hạn.</p>
-    </div>
-
+    <div id="loading"><p>Đang kiểm tra...</p></div>
+    <div id="error" class="hidden"><p>Link không hợp lệ.</p></div>
     <div id="success" class="hidden">
-      <i class="fas fa-gift text-7xl text-yellow-400 mb-6"></i>
-      <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
-      <p class="text-gray-400 mt-2">YeuMoney</p>
-
-      <div id="discordSection">
-        <button onclick="linkDiscord()" id="discordBtn"
-                class="w-full mt-6 bg-[#5865F2] hover:bg-[#4752C4] py-4 rounded-2xl text-lg font-semibold flex items-center justify-center gap-3">
-          <i class="fab fa-discord text-2xl"></i>
-          LIÊN KẾT DISCORD ĐỂ NHẬN THƯỞNG
-        </button>
-      </div>
-
-      <button onclick="claimReward()" id="claimBtn" class="hidden w-full mt-4 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 
-                       py-6 rounded-2xl text-2xl font-bold shadow-xl flex items-center justify-center gap-4 text-black">
-        <i class="fas fa-hand-holding-dollar text-3xl"></i>
-        NHẬN THƯỞNG
-      </button>
+      <h1 class="text-4xl font-bold mb-4">Nhận Thưởng</h1>
+      <button onclick="linkDiscord()" id="discordBtn" class="w-full bg-[#5865F2] py-4 rounded-xl">LIÊN KẾT DISCORD</button>
+      <button onclick="claimReward()" id="claimBtn" class="hidden w-full bg-yellow-500 py-4 rounded-xl">NHẬN THƯỞNG</button>
     </div>
   </div>
 
   <script>
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1507661375244075061/XS1DiHi-LCRkAjQRrG3UrvztqS3gMPgv8ArN3rwseZw7FktEDoD5lMMMvfyOCcw8PFfG";
     const BOT_API_URL = "http://localhost:3000/api/verify";
 
-    function hasValidParam() {
-      const params = new URLSearchParams(window.location.search);
-      return params.has('t') || params.has('token') || params.has('user');
-    }
-
-    function getUserId() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('user');
-    }
-
     function linkDiscord() {
-      // Logic liên kết (bạn có thể thay thế bằng link oauth2 thực tế của bạn)
+      // Thay bằng link OAuth2 của bạn
       localStorage.setItem('discord_linked', 'true');
       document.getElementById('discordBtn').classList.add('hidden');
       document.getElementById('claimBtn').classList.remove('hidden');
     }
 
     async function claimReward() {
-      if (localStorage.getItem('discord_linked') !== 'true') {
-        alert("❌ Vui lòng liên kết Discord trước khi nhận thưởng!");
-        return;
-      }
-      
-      const claimBtn = document.getElementById('claimBtn');
-      claimBtn.disabled = true;
-      claimBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-      const userId = getUserId() || "Unknown";
-      
-      // Gửi tín hiệu về bot
-      try {
-        await fetch(BOT_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: userId })
-        });
-      } catch (e) { console.log("Lỗi kết nối tới Bot"); }
-
-      // Gửi thông báo Webhook
-      try {
-        await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `<@${userId}>`,
-            embeds: [{
-              color: 0x00ff88,
-              title: "🎁 Nhận Thưởng Thành Công",
-              description: "Người dùng vừa nhận thưởng qua link vượt.",
-              fields: [
-                { name: "Số dư cũ", value: "**245,000đ**", inline: true },
-                { name: "Thưởng nhận", value: "**+300đ**", inline: true },
-                { name: "Số dư mới", value: "**245,300đ**", inline: true }
-              ],
-              timestamp: new Date().toISOString()
-            }]
-          })
-        });
-      } catch (e) { console.log("Webhook error"); }
-
-      const resultDiv = document.createElement('div');
-      resultDiv.className = "mt-8 glass rounded-2xl p-8";
-      resultDiv.innerHTML = `<div class="text-center"><div class="animate-spin w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full mx-auto mb-6"></div><p>Đang xử lý nhận thưởng...</p></div>`;
-      document.getElementById('mainContent').appendChild(resultDiv);
-
-      await new Promise(r => setTimeout(r, 1800));
-
-      resultDiv.innerHTML = `
-        <div class="text-center">
-          <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
-          <p class="text-2xl font-semibold text-green-400">Nhận thưởng thành công!</p>
-          <p class="text-gray-300 mt-3">Thông tin đã được gửi qua Discord.</p>
-        </div>
-      `;
-      
-      claimBtn.onclick = null;
-      claimBtn.classList.remove('hidden');
-      claimBtn.classList.replace('from-yellow-400', 'from-gray-600');
-      claimBtn.classList.replace('to-orange-500', 'to-gray-700');
-      claimBtn.classList.replace('text-black', 'text-white');
-      claimBtn.innerHTML = '<i class="fas fa-sign-out-alt text-3xl"></i> RỜI KHỎI';
-      claimBtn.onclick = () => window.location.href = 'https://google.com';
-      claimBtn.disabled = false;
-      claimBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      const userId = new URLSearchParams(window.location.search).get('user');
+      await fetch(BOT_API_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId}) });
+      document.getElementById('claimBtn').innerHTML = "ĐÃ NHẬN THƯỞNG";
+      document.getElementById('claimBtn').onclick = () => window.location.href = 'https://google.com';
     }
 
     window.onload = () => {
-      document.getElementById('loading').classList.remove('hidden');
       setTimeout(() => {
         document.getElementById('loading').classList.add('hidden');
-        if (hasValidParam()) {
-          document.getElementById('success').classList.remove('hidden');
-          if (localStorage.getItem('discord_linked') === 'true') {
-            document.getElementById('discordBtn').classList.add('hidden');
-            document.getElementById('claimBtn').classList.remove('hidden');
-          }
-        } else {
-          document.getElementById('error').classList.remove('hidden');
+        document.getElementById('success').classList.remove('hidden');
+        if (localStorage.getItem('discord_linked') === 'true') {
+          document.getElementById('discordBtn').classList.add('hidden');
+          document.getElementById('claimBtn').classList.remove('hidden');
         }
       }, 800);
     };
