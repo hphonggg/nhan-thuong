@@ -16,8 +16,8 @@
     </div>
 
     <script>
-        // Địa chỉ kết nối đến bot tại cổng 3055
-        const API_BASE_URL = "http://bot.cyerox.fun:3055"; 
+        // Cập nhật kết nối trực tiếp đến IP máy chủ
+        const API_BASE_URL = "http://185.150.1.56:3055"; 
         
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user');
@@ -43,7 +43,7 @@
                     statusText.innerText = "❌ Lỗi: " + (data.message || "Xác thực thất bại");
                 }
             } catch (err) {
-                statusText.innerText = "❌ Lỗi kết nối tới server";
+                statusText.innerText = "❌ Lỗi kết nối tới server (Check Firewall/Port)";
                 console.error("Chi tiết lỗi:", err);
             }
         }
