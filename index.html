@@ -11,42 +11,40 @@
 </head>
 <body class="min-h-screen text-white flex items-center justify-center p-4">
   <div class="max-w-md w-full glass rounded-3xl p-10 shadow-2xl text-center" id="mainContent">
-    <div id="loading"><p>Đang kiểm tra...</p></div>
-    <div id="error" class="hidden"><p>Link không hợp lệ.</p></div>
+    <div id="loading"><div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto"></div></div>
     <div id="success" class="hidden">
-      <h1 class="text-4xl font-bold mb-4">Nhận Thưởng</h1>
-      <button onclick="linkDiscord()" id="discordBtn" class="w-full bg-[#5865F2] py-4 rounded-xl">LIÊN KẾT DISCORD</button>
-      <button onclick="claimReward()" id="claimBtn" class="hidden w-full bg-yellow-500 py-4 rounded-xl">NHẬN THƯỞNG</button>
+      <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
+      <button id="discordBtn" onclick="linkDiscord()" class="w-full bg-[#5865F2] py-4 rounded-xl mt-6 hidden">LIÊN KẾT DISCORD</button>
+      <button id="claimBtn" onclick="claimReward()" class="hidden w-full bg-yellow-500 py-4 rounded-xl mt-6">NHẬN THƯỞNG</button>
     </div>
   </div>
 
   <script>
-    const BOT_API_URL = "http://localhost:3000/api/verify";
+    const userId = new URLSearchParams(window.location.search).get('user');
 
-    function linkDiscord() {
-      // Thay bằng link OAuth2 của bạn
-      localStorage.setItem('discord_linked', 'true');
-      document.getElementById('discordBtn').classList.add('hidden');
-      document.getElementById('claimBtn').classList.remove('hidden');
+    async function checkStatus() {
+      const res = await fetch(`http://localhost:3000/api/check-link/${userId}`);
+      const data = await res.json();
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('success').classList.remove('hidden');
+      if (data.linked) {
+        document.getElementById('claimBtn').classList.remove('hidden');
+      } else {
+        document.getElementById('discordBtn').classList.remove('hidden');
+      }
+    }
+
+    async function linkDiscord() {
+      await fetch('http://localhost:3000/api/link-discord', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId}) });
+      location.reload();
     }
 
     async function claimReward() {
-      const userId = new URLSearchParams(window.location.search).get('user');
-      await fetch(BOT_API_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId}) });
-      document.getElementById('claimBtn').innerHTML = "ĐÃ NHẬN THƯỞNG";
-      document.getElementById('claimBtn').onclick = () => window.location.href = 'https://google.com';
+      await fetch('http://localhost:3000/api/verify', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId}) });
+      window.location.href = 'https://google.com';
     }
 
-    window.onload = () => {
-      setTimeout(() => {
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('success').classList.remove('hidden');
-        if (localStorage.getItem('discord_linked') === 'true') {
-          document.getElementById('discordBtn').classList.add('hidden');
-          document.getElementById('claimBtn').classList.remove('hidden');
-        }
-      }, 800);
-    };
+    window.onload = checkStatus;
   </script>
 </body>
 </html>
