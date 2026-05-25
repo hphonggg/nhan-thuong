@@ -22,7 +22,9 @@
     </div>
 
     <script>
-        const API_BASE_URL = "https://URL-BACKEND-CUA-BAN.com"; 
+        // QUAN TRỌNG: Hãy thay thế dòng dưới bằng URL backend thật của bạn!
+        const API_BASE_URL = "http://localhost:3000"; 
+        
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user');
         const token = urlParams.get('token');
@@ -45,21 +47,20 @@
                     statusText.innerText = "Lỗi xác thực!";
                 }
             } catch (err) {
-                statusText.innerText = "Lỗi kết nối máy chủ!";
+                console.error(err);
+                statusText.innerText = "Không thể kết nối máy chủ! Hãy đảm bảo API_BASE_URL đã được cấu hình đúng.";
             }
         }
 
         async function init() {
-            if (!userId) { statusText.innerText = "Thiếu thông tin!"; return; }
+            if (!userId) { statusText.innerText = "Thiếu thông tin người dùng!"; return; }
             try {
                 const res = await fetch(`${API_BASE_URL}/api/check-link/${userId}`);
                 const data = await res.json();
 
                 if (data.linked) {
-                    // Đã liên kết: Tự động nhận quà
                     verifyReward();
                 } else {
-                    // Chưa liên kết: Bắt liên kết
                     statusText.innerText = "Bạn cần liên kết Discord để nhận quà.";
                     btnAction.innerText = "Liên kết Discord";
                     btnAction.style.display = "block";
@@ -67,7 +68,10 @@
                         window.location.href = "https://discord.com/api/oauth2/authorize?client_id=1401137325043617922&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&response_type=code&scope=identify";
                     };
                 }
-            } catch (e) { statusText.innerText = "Lỗi kết nối máy chủ!"; }
+            } catch (e) { 
+                console.error(e);
+                statusText.innerText = "Lỗi kết nối máy chủ! (URL hiện tại: " + API_BASE_URL + ")"; 
+            }
         }
 
         init();
