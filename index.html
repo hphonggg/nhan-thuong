@@ -5,48 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nhận Thưởng</title>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; margin: 0;
-            background-color: #11141c;
-            color: #ffffff;
-        }
-        .card {
-            background: #1c212e;
-            padding: 50px; 
-            border-radius: 15px;
-            border: 1px solid #30364d;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-            width: 350px;
-        }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #11141c; color: #ffffff; }
+        .card { background: #1c212e; padding: 50px; border-radius: 15px; border: 1px solid #30364d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: 350px; }
         h1 { font-size: 24px; margin-bottom: 20px; }
         p { color: #a0a0a0; margin-bottom: 30px; }
-        .btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: transform 0.2s, background-color 0.2s;
-            text-transform: uppercase;
-            width: 100%;
-            margin-bottom: 15px;
-        }
+        .btn { padding: 15px 40px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: transform 0.2s, background-color 0.2s; text-transform: uppercase; width: 100%; margin-bottom: 15px; }
         #btn-nhan { background-color: #28a745; color: white; }
         #btn-nhan:hover { background-color: #218838; transform: scale(1.05); }
         #btn-roi { background-color: #555; color: #ccc; cursor: not-allowed; }
         #btn-roi.active { background-color: #dc3545; color: white; cursor: pointer; }
-        #btn-roi.active:hover { background-color: #c82333; transform: scale(1.05); }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>Chúc mừng bạn!</h1>
-        <p>Nhận Lúa Ngay 🌾</p>
-        <button id="btn-nhan" class="btn">Nhận Lúa 🌾</button>
+        <p id="status-text">Đang kiểm tra trạng thái...</p>
+        <button id="btn-nhan" class="btn" style="display:none;">Nhận Lúa 🌾</button>
         <button id="btn-roi" class="btn" disabled>Rời khỏi</button>
     </div>
 
@@ -54,40 +28,49 @@
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user');
         const token = urlParams.get('token');
+        const btnNhan = document.getElementById('btn-nhan');
+        const statusText = document.getElementById('status-text');
 
-        document.getElementById('btn-nhan').addEventListener('click', async () => {
-            if (!userId || !token) {
-                alert("Link không hợp lệ hoặc đã hết hạn!");
-                return;
-            }
-
+        async function init() {
             try {
-                const res = await fetch('https://hphonggg.github.io/nhan-thuong/api/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, token })
-                });
-
+                // Kiểm tra xem user đã liên kết chưa
+                const res = await fetch(`https://bot-cua-ban.com/api/check-link/${userId}`);
                 const data = await res.json();
-                if (data.status === "success") {
-                    alert("Vượt link thành công! Đang chờ admin duyệt.");
-                    
-                    // Vô hiệu hóa nút Nhận Lúa
-                    document.getElementById('btn-nhan').disabled = true;
-                    document.getElementById('btn-nhan').innerText = "Đã gửi yêu cầu";
 
-                    // Kích hoạt nút Rời khỏi
-                    const btnRoi = document.getElementById('btn-roi');
-                    btnRoi.disabled = false;
-                    btnRoi.classList.add('active');
-                    btnRoi.onclick = () => window.location.href = 'https://google.com';
+                if (data.linked) {
+                    statusText.innerText = "Nhận Lúa Ngay 🌾";
+                    btnNhan.style.display = "block";
                 } else {
-                    alert("Lỗi: Token đã hết hạn hoặc không hợp lệ!");
+                    statusText.innerText = "Bạn chưa liên kết Discord!";
+                    btnNhan.innerText = "Liên kết Discord";
+                    btnNhan.style.display = "block";
+                    btnNhan.onclick = () => {
+                        // Chuyển hướng tới trang đăng nhập Discord của bạn
+                        window.location.href = "https://discord.com/api/oauth2/authorize?client_id=1401137325043617922&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhan-thuong%2F&response_type=code&scope=identify";
+                    };
                 }
-            } catch (err) {
-                alert("Không thể kết nối tới máy chủ.");
+            } catch (e) { statusText.innerText = "Lỗi tải dữ liệu!"; }
+        }
+
+        btnNhan.addEventListener('click', async () => {
+            // Nếu đã liên kết thì thực hiện nhận thưởng
+            const res = await fetch('https://bot-cua-ban.com/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, token })
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                alert("Đã gửi yêu cầu nhận thưởng!");
+                btnNhan.disabled = true;
+                const btnRoi = document.getElementById('btn-roi');
+                btnRoi.disabled = false;
+                btnRoi.classList.add('active');
+                btnRoi.onclick = () => window.location.href = 'https://google.com';
             }
         });
+
+        init();
     </script>
 </body>
 </html>
